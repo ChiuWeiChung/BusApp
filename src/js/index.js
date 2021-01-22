@@ -8,6 +8,7 @@ import * as infoView from './views/infoView';
 
 
 const form = document.querySelector('form');
+const regionSelector = document.querySelector('select');
 const busInput = document.querySelector('.bus-input');
 
 
@@ -15,25 +16,39 @@ const busInput = document.querySelector('.bus-input');
 class App {
     constructor() {
         this.googleMap;
-        this.busSearch = [];
+        this.busSearch = {};
+        this.region;
+        this.busNumber;
+        this.depAndDes;
         this.checkDirection = 'forward';
         this._renderMap.call(this);  // Render Google Map
         form.addEventListener('submit', this._newBus.bind(this));
-
     }
 
     async _newBus(e) {
         e.preventDefault();
         this.checkDirection = 'forward';
         let bus;
-        const busNumber = busInput.value;
-        bus = new Bus(busNumber);
+        const region = regionSelector.value;
+        const busNumber = busInput.value.trim();
+        this.region = region;
+        this.busNumber = busNumber;
+        busInput.value = "";
+        bus = new Bus(busNumber,region);
+        //  Fetch Bus Information from BUS API
+        this.depAndDes = await bus._getRouteID();
+        console.log(this.depAndDes);
         const dataFetchAll = await bus._getData();
-        // Remove existed information column
+
+        // Remove existed information column and render loader for few seconds
         infoView.infoClear();
-        // Render error message if fetch process is failed
-        if (!dataFetchAll[0] || !dataFetchAll[1]) {
+        infoView.renderLoader();
+        await infoView.wait();
+
+        
+        if (!dataFetchAll[0] || !dataFetchAll[1]) { // Render error message if fetch process is failed
             console.log(`Data can't be found`);
+            infoView.removeLoader();
             infoView.renderError('showError');
             this.googleMap._deleteMarkers(this.googleMap.busMarkers, this.googleMap.stopMarkers);
         } else {
@@ -48,7 +63,8 @@ class App {
             this.busSearch = busData;
 
             // ======= Information column section =======
-            infoView.renderInfo(busData);
+            infoView.removeLoader();
+            infoView.renderInfo(busData,busNumber,this.depAndDes);
             infoView.renderError();
             // Check the bus route has round-trip or not
             infoView.isOneWay(busData.stopSequence[1]);
@@ -70,36 +86,27 @@ class App {
 
 
     _statusClicker() {
-        // console.log(this);
-        let that = this;
-        const busStatusElement = [...document.querySelectorAll('.station-status')];
-
-        // attach event listener to stopName element
-        const stopNameElement = busStatusElement.map(el => el.previousElementSibling);
         const stopSequenceArr = this.busSearch.stopSequence.find(el => el.direction === this.checkDirection);
         stopSequenceArr.stopName.forEach(el => {
+            const busItem = document.querySelector(`[data-id="${el.stopId}"]`).children;
             let location = { lat: el.busLocation.PositionLat, lng: el.busLocation.PositionLon };
-            stopNameElement[el.sequence - 1].addEventListener('click', (e) => {
+            // attach event listener to stopName element
+            busItem[0].addEventListener('click', () => {
                 this.googleMap._zoomMarkers(location);
-                this.googleMap.stopInfoWindow[el.sequence - 1].open(map, this.googleMap.stopMarkers[el.sequence - 1])
+                const index = this.googleMap.stopInfoWindow.findIndex(item => item.content.includes(el.name));
+                this.googleMap.stopInfoWindow[index].open(map, this.googleMap.stopMarkers[index]);
             })
-        })
-        // console.log(this.googleMap.stopMarkers);
-        console.log(this.googleMap.stopInfoWindow);
-
-        // attach event listner to plateNumber element
-        const hasBusArr = this.busSearch.nearbyStop[this.checkDirection].map(el => el.stopSequence);
-        hasBusArr.forEach(el => {
-            busStatusElement[el - 1].classList.add('btn', 'btn-info');
-            busStatusElement[el - 1].addEventListener('click', function () {
-                const plateNum = this.textContent.split(" ").find(el => el.length > 2);
-                const target = that.busSearch.location[that.checkDirection].find(item => item.plateNumber === plateNum);
-                if (target) {
-                    that.googleMap._zoomMarkers(target.location);
-                }
-            })
+            // attach event listner to plateNumber element
+            const plateTarget = this.busSearch.location[this.checkDirection].find(item => item.plateNumber === busItem[1].textContent.trim());
+            if (plateTarget) {
+                busItem[1].classList.add('btn', 'btn-info');
+                busItem[1].addEventListener('click', () => {
+                    this.googleMap._zoomMarkers(plateTarget.location);
+                })
+            }
 
         })
+
     }
 
     _directionBtnHandler(e) {
