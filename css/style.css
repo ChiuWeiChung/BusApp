@@ -6,6 +6,7 @@
 /* Optional: Makes the sample page fill the window. */
 html,
 body {
+  min-width: 320px;
   height: 100%;
   margin: 0;
   padding: 0;
@@ -14,16 +15,31 @@ body {
   background-color: #f7f7f7;
 }
 .container {
-  height: 80%;
+  height: 78%;
   margin: 0;
   padding: 0;
 }
 
 .input-column{
   height: 100%;
-  box-shadow: 0 0 1px #9a988c;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
   background-color: white;
 }
+
+
+.loader img {
+  height: 2rem;
+  width: 2rem;
+  fill: #F59A83;
+  transform-origin: 44% 50%;
+  animation: rotate 1.5s infinite linear; 
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0); }
+  100% {
+    transform: rotate(360deg); } }
 
 form label{
   font-size: 1.1rem;
@@ -33,12 +49,16 @@ form label{
   font-size: 1.2rem;
 }
 
+.custom-select {
+  width: 60%;
+}
+
 .form-control {
   width: 60%;
 }
 
 .bus-info{
-  height: 80%;
+  height: 62%;
   transition: all 0.3s;
   opacity: 100%;
 }
@@ -63,7 +83,11 @@ form label{
 .bus-status{
   height: 75%;
   overflow: auto;
-  font-size: 0.8rem;
+  font-size: 1.0rem;
+}
+
+.bus-item{
+  width: 95%;
 }
 
 .station-info{
@@ -81,13 +105,12 @@ form label{
 
 .reference {
   text-align: left;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    padding-left: 5%;
-    /* background-color: rgb(226, 203, 169); */
-    background-image: linear-gradient(to right bottom, #fdfaf3, #a09f9f);
-    width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding-left: 5%;
+  background-image: linear-gradient(to right bottom, #fdfaf3, #a09f9f);
+  width: 100%;
 }
 
 .img-container{
@@ -100,7 +123,7 @@ form label{
 }
 
 .signature {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
 }
 
 /* .signature p {
