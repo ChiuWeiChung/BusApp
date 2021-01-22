@@ -1,14 +1,13 @@
 
-
 const inputColumn = document.querySelector('.input-column');
 
-export function renderInfo(busData) {
+export function renderInfo(busData,busNum,depAndDes) {
     const html = `
     <div class="bus-info mt-3 ">
-        <div class="info text-left border-bottom ml-3 ">動態資訊</div>
+        <div class="info text-left border-bottom ml-3 ">${busNum} 動態資訊</div>
         <div class="direction-btn d-flex mt-3">
-            <div class="forward btn btn-primary direction clicked" data-direction='go'>去程</div>
-            <div class="backward btn btn-secondary direction" data-direction='back'>回程</div>
+            <div class="forward btn btn-primary direction clicked" data-direction='go'>去程 (往${depAndDes.destination})</div>
+            <div class="backward btn btn-secondary direction" data-direction='back'>回程 (往${depAndDes.departure})</div>
         </div>
         <div class="bus-status mx-2 my-3 text-center">
             <div class=" title d-flex align-items-center d-flex justify-content-around ">
@@ -27,9 +26,6 @@ export function renderInfo(busData) {
     `;
     inputColumn.insertAdjacentHTML('beforeend', html);
 
-    // const busInfo = document.querySelector('.bus-info');  // the following code should bring into index.js
-    // console.log(busInfo);
-    // busInfo.addEventListener('click', directionBtnHandler);
     addBusItem(busData, 'forward');
 }
 
@@ -79,15 +75,36 @@ export function addBusItem(data, direction = 'forward') {
     renderTimeAndPlateNumber(data.estimatedTime[direction], data.nearbyStop[direction]);
 }
 
+export function renderLoader() {
+    const markup = `
+    <div class="loader text-center my-3">
+        <img src="img/loading.png" alt="">
+    </div>
+    `;
 
-function renderTimeAndPlateNumber(estimatedData, nearbyStopData) {
-    // console.log('hihi');
-    estimatedData.forEach(el => {
+    document.querySelector('form').insertAdjacentHTML('afterend', markup);
+}
+
+export function removeLoader() {
+    document.querySelector('.loader').remove();
+}
+
+export function wait() {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve()
+        }, 500)
+    })
+}
+
+function renderTimeAndPlateNumber(estimatedTimeData, nearbyStopData) {
+    // render estimated Time to info column
+    estimatedTimeData.forEach(el => {
         const timeStatusElement = [...document.querySelector(`[data-id="${el.stopId}"]`).children][2];
-        // timeStatusElement.textContent += el.estimatedTime===null?`---`:`預計${el.estimatedTime}分鐘到達`;
         timeStatusElement.textContent += handleTime(el.estimatedTime);
     });
 
+    // render PlateNumber to info column
     const plateNumberElement = [...document.querySelectorAll('.station-status')];
     plateNumberElement.forEach((el, index) => {
         if (nearbyStopData.length === 0) {
@@ -95,8 +112,11 @@ function renderTimeAndPlateNumber(estimatedData, nearbyStopData) {
         };
         const data = nearbyStopData.find(item => item.stopSequence - 1 === index);
         if (data) {
-            el.classList.add('btn','btn-info')
+            el.classList.add('btn', 'btn-info')
             el.textContent += `${data.plateNumber}`;
+            if(data.isGetIn){
+                el.nextElementSibling.textContent="進站中";
+            }
             
         }
 
@@ -126,9 +146,9 @@ export function isOneWay(backward) {
     }
 }
 
-export function renderError(str){
+export function renderError(str) {
     const errorInfo = document.querySelector('.error-info');
-    if(str==='showError'){
+    if (str === 'showError') {
         errorInfo.classList.remove('d-none');
     } else {
         errorInfo.classList.add('d-none');

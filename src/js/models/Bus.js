@@ -1,14 +1,13 @@
 import jsSHA from 'jssha';
 import axios from "axios";
-import {busKey} from "./key";
+import { busKey } from "./key";
 
 
 
 class Bus {
-    constructor(busNum) {
-        // this.busData=[];
-        // this._getData.call(this, busNum);
-        this.busNum = busNum;
+    constructor(busNum,region) {
+        this.busNum = busNum.trim();
+        this.region = region
     }
 
     _getAuthorizationHeader() {
@@ -27,21 +26,24 @@ class Bus {
         return Promise.all([this._fetchLocation(), this._fetchNearStop(), this._fetchEstimatedTime(), this._fetchStopRoute()]);
     }
 
+
     _fetchLocation() {
         return new Promise((resolve, reject) => {
-            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/RealTimeByFrequency/City/NewTaipei/${this.busNum}?$format=JSON`, {
+            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/RealTimeByFrequency/City/${this.region}/${this.busNum}?$format=JSON`, {
                 headers: this._getAuthorizationHeader(),
                 params: {
-                    "$top": 10,
+                    "$top": 30,
+                    "$filter": `RouteID eq '${this.routeID}'`
                 }
             }).then(res => {
                 if (res.data.length === 0) resolve(false);
-                // console.log(res.data);
+                const dataFilter = res.data.filter((item) => item.RouteName.Zh_tw === this.busNum);
                 const dataArr = res.data.map(el => {
                     return {
                         location: { lat: el.BusPosition.PositionLat, lng: el.BusPosition.PositionLon },
                         direction: el.Direction,
-                        plateNumber: el.PlateNumb
+                        plateNumber: el.PlateNumb,
+                        routeId: el.RouteID,
                     }
                 })
                 this.busData = dataArr;
@@ -54,15 +56,16 @@ class Bus {
 
     _fetchNearStop() {
         return new Promise((resolve, reject) => {
-            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/RealTimeNearStop/City/NewTaipei/${this.busNum}?$format=JSON`, {
+            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/RealTimeNearStop/City/${this.region}/${this.busNum}?$format=JSON`, {
                 headers: this._getAuthorizationHeader(),
                 params: {
-                    "$top": 10,
+                    "$top": 30,
+                    "$filter": `RouteID eq '${this.routeID}'`
                 }
             }).then(res => {
                 if (res.data.length === 0) resolve(false);
-                // console.log(res.data);
-                const dataNearStop = res.data.map(el => {
+                const dataFilter = res.data.filter((item) => item.RouteName.Zh_tw === this.busNum);
+                const dataNearStop = dataFilter.map(el => {
                     return {
                         plateNumber: el.PlateNumb,
                         direction: el.Direction,
@@ -80,14 +83,16 @@ class Bus {
 
     _fetchEstimatedTime() {
         return new Promise((resolve, reject) => {
-            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/NewTaipei/${this.busNum}?$format=JSON`, {
+            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/EstimatedTimeOfArrival/City/${this.region}/${this.busNum}?$format=JSON`, {
                 headers: this._getAuthorizationHeader(),
                 params: {
-                    "$top": 120,
+                    "$top": "200",
+                    "$filter": `RouteID eq '${this.routeID}'`,
                 }
             }).then(res => {
                 if (res.data.length === 0) resolve(false);
-                const timeData = res.data.map(el => {
+                const dataFilter = res.data.filter((item) => item.RouteName.Zh_tw === this.busNum);
+                const timeData = dataFilter.map(el => {
                     return {
                         estimatedTime: el.EstimateTime === undefined ? null : Math.round(el.EstimateTime / 60),
                         stopId: el.StopID,
@@ -105,26 +110,37 @@ class Bus {
 
     _fetchStopRoute() {
         return new Promise((resolve, reject) => {
-            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/StopOfRoute/City/NewTaipei/${this.busNum}?$format=JSON`, {
+            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/StopOfRoute/City/${this.region}/${this.busNum}?$format=JSON`, {
                 headers: this._getAuthorizationHeader(),
                 params: {
-                    "$top": 10,
+                    "$top": 30,
+                    "$filter": `RouteID eq '${this.routeID}'`
                 }
             }).then(res => {
                 if (res.data.length === 0) resolve(false);
-                // console.log(res.data);
+                // console.log(res);
+
+                let dataFilter;
+                if (res.data.length === 1) {
+                    dataFilter = res.data
+                } else if (res.data.length === 2) {
+                    dataFilter = res.data.filter((item) => item.RouteName.Zh_tw === this.busNum).slice(0, 2);
+                } else if (res.data.length > 3) {
+                    dataFilter = res.data.filter((item) => item.RouteName.Zh_tw === this.busNum).slice(2, 4);
+                }
+
                 const forward = {};
                 const backward = {};
-                res.data.forEach(el => {
+                dataFilter.forEach(el => {
                     if (el.Direction === 0) {
                         forward.direction = 'forward';
                         forward.stopName = el.Stops.map(el => {
-                            return { stopId: el.StopID, sequence: el.StopSequence, name: el.StopName.Zh_tw, busLocation:el.StopPosition };
+                            return { stopId: el.StopID, sequence: el.StopSequence, name: el.StopName.Zh_tw, busLocation: el.StopPosition };
                         });
                     } else {
                         backward.direction = 'backward';
                         backward.stopName = el.Stops.map(el => {
-                            return { stopId: el.StopID, sequence: el.StopSequence, name: el.StopName.Zh_tw, busLocation:el.StopPosition };
+                            return { stopId: el.StopID, sequence: el.StopSequence, name: el.StopName.Zh_tw, busLocation: el.StopPosition };
                         });
                     }
                 })
@@ -134,6 +150,27 @@ class Bus {
             })
         })
 
+    }
+
+    _getRouteID(id) {
+        return new Promise((resolve, reject) => {
+            axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/Route/City/${this.region}/${this.busNum}?$format=JSON`, {
+                headers: this._getAuthorizationHeader(),
+                params: {
+                    "$top": 20
+                }
+            }).then(res => {
+                if (res.data.length === 0) resolve(false);
+                const busData = res.data.find(el => {
+                    return el.RouteName.Zh_tw === this.busNum.trim()
+                });
+
+                this.routeID = busData.RouteID;
+                resolve({ departure: busData.DepartureStopNameZh, destination: busData.DestinationStopNameZh });
+            }).catch(err => {
+                reject(err);
+            })
+        })
     }
 
 
