@@ -39,10 +39,36 @@ body {
   0% {
     transform: rotate(0); }
   100% {
-    transform: rotate(360deg); } }
+    transform: rotate(360deg); } 
+}
+
+form {
+  transition: all 0.5s ;
+  height: 0px;
+  overflow: hidden;
+
+}
 
 form label{
   font-size: 1.1rem;
+}
+
+.show {
+  height:135px;
+}
+
+.search-btn {
+  width: 98%;
+}
+
+.burger {
+  width: 5%;
+  
+}
+
+.line {
+  border-bottom: 2px solid black;
+  padding-top: 4px;
 }
 
 .info {
@@ -57,8 +83,10 @@ form label{
   width: 60%;
 }
 
+
+
 .bus-info{
-  height: 62%;
+  height: 50%;
   transition: all 0.3s;
   opacity: 100%;
 }
@@ -84,6 +112,10 @@ form label{
   height: 75%;
   overflow: auto;
   font-size: 1.0rem;
+}
+
+.extend {
+  height: 90%;
 }
 
 .bus-item{
