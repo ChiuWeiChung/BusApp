@@ -10,6 +10,7 @@ import * as infoView from './views/infoView';
 const form = document.querySelector('form');
 const regionSelector = document.querySelector('select');
 const busInput = document.querySelector('.bus-input');
+const searchBtn = document.querySelector('.search-btn');
 
 
 
@@ -23,6 +24,7 @@ class App {
         this.checkDirection = 'forward';
         this._renderMap.call(this);  // Render Google Map
         form.addEventListener('submit', this._newBus.bind(this));
+        searchBtn.addEventListener('click', infoView.renderToggler);
     }
 
     async _newBus(e) {
@@ -34,23 +36,20 @@ class App {
         this.region = region;
         this.busNumber = busNumber;
         busInput.value = "";
-        bus = new Bus(busNumber,region);
-        //  Fetch Bus Information from BUS API
-        this.depAndDes = await bus._getRouteID();
-        console.log(this.depAndDes);
-        const dataFetchAll = await bus._getData();
+        bus = new Bus(busNumber, region);
 
         // Remove existed information column and render loader for few seconds
-        infoView.infoClear();
         infoView.renderLoader();
+        infoView.infoClear();
         await infoView.wait();
 
-        
+        //  Fetch Bus Information from BUS API
+        this.depAndDes = await bus._getRouteID();
+        if (!this.depAndDes) return this._errorHandler();
+        const dataFetchAll = await bus._getData();
+
         if (!dataFetchAll[0] || !dataFetchAll[1]) { // Render error message if fetch process is failed
-            console.log(`Data can't be found`);
-            infoView.removeLoader();
-            infoView.renderError('showError');
-            this.googleMap._deleteMarkers(this.googleMap.busMarkers, this.googleMap.stopMarkers);
+            this._errorHandler()
         } else {
             // ======= build up the database =======
             const busData = {
@@ -64,13 +63,14 @@ class App {
 
             // ======= Information column section =======
             infoView.removeLoader();
-            infoView.renderInfo(busData,busNumber,this.depAndDes);
+            infoView.renderInfo(busData, busNumber, this.depAndDes);
             infoView.renderError();
             // Check the bus route has round-trip or not
             infoView.isOneWay(busData.stopSequence[1]);
             // add event handler on direction button
             document.querySelector('.bus-info').addEventListener('click', this._directionBtnHandler.bind(this));
-
+            // shrink the input form 
+            infoView.renderToggler();
             // ========== Google Map Section ==========
             // Remove existed old markers and render new markers
             this.googleMap._deleteMarkers(this.googleMap.busMarkers, this.googleMap.stopMarkers);
@@ -150,6 +150,13 @@ class App {
                 that.googleMap = googleMap;
             })
         }
+    }
+
+    _errorHandler() {
+        console.log(`Data can't be found`);
+        infoView.removeLoader();
+        infoView.renderError('showError');
+        this.googleMap._deleteMarkers(this.googleMap.busMarkers, this.googleMap.stopMarkers);
     }
 
 }
