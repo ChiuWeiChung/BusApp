@@ -1,9 +1,9 @@
 
 const inputColumn = document.querySelector('.input-column');
 
-export function renderInfo(busData,busNum,depAndDes) {
+export function renderInfo(busData, busNum, depAndDes) {
     const html = `
-    <div class="bus-info mt-3 ">
+    <div class="bus-info mt-1 ">
         <div class="info text-left border-bottom ml-3 ">${busNum} 動態資訊</div>
         <div class="direction-btn d-flex mt-3">
             <div class="forward btn btn-primary direction clicked" data-direction='go'>去程 (往${depAndDes.destination})</div>
@@ -58,7 +58,7 @@ export function addBusItem(data, direction = 'forward') {
 
     sequence.stopName.forEach(el => {
         const markup = `
-        <div class="bus-item d-flex align-items-center border-bottom my-4" data-id=${el.stopId}>
+        <div class="bus-item d-flex align-items-center border-bottom my-2" data-id=${el.stopId}>
             <div class="station-name btn btn-light mr-2 my-1 text-dark col-sm-4 ">
                 ${el.name}
             </div>
@@ -73,6 +73,16 @@ export function addBusItem(data, direction = 'forward') {
         document.querySelector('.bus-status').insertAdjacentHTML('beforeend', markup);
     });
     renderTimeAndPlateNumber(data.estimatedTime[direction], data.nearbyStop[direction]);
+}
+
+export function renderToggler() {
+    const searchBtn = document.querySelector('.search-btn');
+    searchBtn.classList.remove('d-none');
+    const operator = searchBtn.textContent==="展開搜尋欄"?"收起搜尋欄":"展開搜尋欄";
+    searchBtn.textContent= operator;
+    
+    document.querySelector('form').classList.toggle('show');
+    document.querySelector('.bus-info').classList.toggle('extend');
 }
 
 export function renderLoader() {
@@ -113,11 +123,11 @@ function renderTimeAndPlateNumber(estimatedTimeData, nearbyStopData) {
         const data = nearbyStopData.find(item => item.stopSequence - 1 === index);
         if (data) {
             el.classList.add('btn', 'btn-info')
-            el.textContent += `${data.plateNumber}`;
-            if(data.isGetIn){
-                el.nextElementSibling.textContent="進站中";
+            el.textContent+= `${data.plateNumber}`;
+            if (data.isGetIn) {
+                el.nextElementSibling.textContent = "進站中";
             }
-            
+
         }
 
     })

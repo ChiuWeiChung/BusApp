@@ -161,12 +161,14 @@ class Bus {
                 }
             }).then(res => {
                 if (res.data.length === 0) resolve(false);
+                // console.log(res.data);                
                 const busData = res.data.find(el => {
                     return el.RouteName.Zh_tw === this.busNum.trim()
                 });
-
+                if(!busData) resolve(false);
                 this.routeID = busData.RouteID;
                 resolve({ departure: busData.DepartureStopNameZh, destination: busData.DestinationStopNameZh });
+                // resolve(busData);
             }).catch(err => {
                 reject(err);
             })
