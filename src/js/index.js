@@ -27,6 +27,7 @@ class App {
         searchBtn.addEventListener('click', infoView.renderToggler);
     }
 
+
     async _newBus(e) {
         e.preventDefault();
         this.checkDirection = 'forward';
@@ -37,7 +38,6 @@ class App {
         this.busNumber = busNumber;
         busInput.value = "";
         bus = new Bus(busNumber, region);
-
         // Remove existed information column and render loader for few seconds
         infoView.renderLoader();
         infoView.infoClear();
@@ -85,6 +85,7 @@ class App {
 
 
 
+
     _statusClicker() {
         const stopSequenceArr = this.busSearch.stopSequence.find(el => el.direction === this.checkDirection);
         stopSequenceArr.stopName.forEach(el => {
@@ -122,7 +123,6 @@ class App {
             // Remove existed old markers and render new markers
             this.googleMap._deleteMarkers(this.googleMap.busMarkers, this.googleMap.stopMarkers);
             this.googleMap._renderMarkersAni(this.busSearch.location[this.checkDirection]);
-            // console.log(this.busSearch.stopSequence[1])
             const stopData = busData.stopSequence.find(el => el.direction === this.checkDirection);
             this.googleMap._renderBusStop(stopData);
         }
@@ -153,7 +153,6 @@ class App {
     }
 
     _errorHandler() {
-        console.log(`Data can't be found`);
         infoView.removeLoader();
         infoView.renderError('showError');
         this.googleMap._deleteMarkers(this.googleMap.busMarkers, this.googleMap.stopMarkers);

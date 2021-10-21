@@ -3,7 +3,7 @@ const inputColumn = document.querySelector('.input-column');
 
 export function renderInfo(busData, busNum, depAndDes) {
     const html = `
-    <div class="bus-info mt-1 ">
+    <div class="bus-info mt-1 text-light ">
         <div class="info text-left border-bottom ml-3 ">${busNum} 動態資訊</div>
         <div class="direction-btn d-flex mt-3">
             <div class="forward btn btn-primary direction clicked" data-direction='go'>去程 (往${depAndDes.destination})</div>

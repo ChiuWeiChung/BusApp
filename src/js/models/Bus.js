@@ -26,7 +26,6 @@ class Bus {
         return Promise.all([this._fetchLocation(), this._fetchNearStop(), this._fetchEstimatedTime(), this._fetchStopRoute()]);
     }
 
-
     _fetchLocation() {
         return new Promise((resolve, reject) => {
             axios.get(`https://ptx.transportdata.tw/MOTC/v2/Bus/RealTimeByFrequency/City/${this.region}/${this.busNum}?$format=JSON`, {
@@ -118,7 +117,6 @@ class Bus {
                 }
             }).then(res => {
                 if (res.data.length === 0) resolve(false);
-                // console.log(res);
 
                 let dataFilter;
                 if (res.data.length === 1) {
@@ -161,14 +159,12 @@ class Bus {
                 }
             }).then(res => {
                 if (res.data.length === 0) resolve(false);
-                // console.log(res.data);                
                 const busData = res.data.find(el => {
                     return el.RouteName.Zh_tw === this.busNum.trim()
                 });
                 if(!busData) resolve(false);
                 this.routeID = busData.RouteID;
                 resolve({ departure: busData.DepartureStopNameZh, destination: busData.DestinationStopNameZh });
-                // resolve(busData);
             }).catch(err => {
                 reject(err);
             })
