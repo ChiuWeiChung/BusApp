@@ -12,18 +12,20 @@ body {
   padding: 0;
   font-size: 0.9rem;
   font-family: 'Noto Sans TC', sans-serif;
-  background-color: #f7f7f7;
 }
+
 .container {
-  height: 78%;
+  height: 80%;
   margin: 0;
   padding: 0;
 }
 
-.input-column{
+.input-column {
   height: 100%;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-  background-color: white;
+  background-image: linear-gradient(45deg, #b9d2ecc7, #000000), url(../img/jay-ee-KElQS_Mxa-g-unsplash.jpg);
+  background-size: cover;
+  background-position: center;
 }
 
 
@@ -32,29 +34,32 @@ body {
   width: 2rem;
   fill: #F59A83;
   transform-origin: 44% 50%;
-  animation: rotate 1.5s infinite linear; 
+  animation: rotate 1.5s infinite linear;
 }
 
 @keyframes rotate {
   0% {
-    transform: rotate(0); }
+    transform: rotate(0);
+  }
+
   100% {
-    transform: rotate(360deg); } 
+    transform: rotate(360deg);
+  }
 }
 
 form {
-  transition: all 0.5s ;
+  transition: all 0.5s;
   height: 0px;
   overflow: hidden;
 
 }
 
-form label{
+form label {
   font-size: 1.1rem;
 }
 
 .show {
-  height:135px;
+  height: 135px;
 }
 
 .search-btn {
@@ -63,7 +68,7 @@ form label{
 
 .burger {
   width: 5%;
-  
+
 }
 
 .line {
@@ -85,13 +90,13 @@ form label{
 
 
 
-.bus-info{
+.bus-info {
   height: 50%;
   transition: all 0.3s;
   opacity: 100%;
 }
 
-.direction-btn{
+.direction-btn {
   height: 35px;
   font-size: 0.8rem;
 }
@@ -104,11 +109,11 @@ form label{
 }
 
 
-.clicked{
+.clicked {
   transform: translateY(-15px);
 }
 
-.bus-status{
+.bus-status {
   height: 75%;
   overflow: auto;
   font-size: 1.0rem;
@@ -118,11 +123,11 @@ form label{
   height: 90%;
 }
 
-.bus-item{
+.bus-item {
   width: 95%;
 }
 
-.station-info{
+.station-info {
   padding: 2% 0 2% 0;
   font-weight: bold;
   border-radius: 10px;
@@ -141,31 +146,35 @@ form label{
   bottom: 0;
   left: 0;
   padding-left: 5%;
-  background-image: linear-gradient(to right bottom, #fdfaf3, #a09f9f);
+  /* background-image: linear-gradient(to right bottom, #fdfaf3, #a09f9f); */
   width: 100%;
 }
 
-.img-container{
-  width: 50%;
+.fab {
+  font-size: 1.5rem;
+}
+
+.bootstrap-info {
+  color: #b586ff;
+}
+
+.webpack-icon {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .api-name img {
-  width: 60%;
-  /* width: fit-content; */
+  height: 1.5rem;
 }
 
-.signature {
+/* .signature {
   font-size: 1.3rem;
 }
 
-/* .signature p {
-  mar
-} */
-
 .signature img {
   width: 15%;
-}
+} */
 
-.gm-style-iw{
+.gm-style-iw {
   opacity: 0.8;
 }
